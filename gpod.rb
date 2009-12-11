@@ -27,8 +27,8 @@ module GPod
   ffi_lib 'gpod'
 
   attach_function :itdb_parse, [:string, :pointer], :pointer
+  attach_function :itdb_tracks_number, [:pointer], :uint32
 end
 
-x = GPod.itdb_parse("/tmp/ipod/", nil)
-
-puts "#{x}"
+db = GPod.itdb_parse("ipod/", nil)
+puts GPod.itdb_tracks_number(db)
