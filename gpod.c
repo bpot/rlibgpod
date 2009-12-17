@@ -9,15 +9,16 @@ void main(void) {
     GList *tracks;
     Itdb_Track *track;
     int num;
+    int i;
 
     db = itdb_parse("/home/paulv/files/src/ruby/rlibgpod/ipod", NULL);
     num = itdb_tracks_number(db);
     tracks = db->tracks;
     printf("%d\n", num);
-    printf("%p\n", db);
-    printf("%p\n", tracks);
 
-    track = tracks->data;
-    printf("%s\n", track->title);
+    for (i = 0; tracks != NULL; i++) {
+        tracks = tracks->next;
+    }
+    printf("%d\n", i);
 
 }

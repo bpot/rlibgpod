@@ -167,21 +167,22 @@ module GPod
   attach_function :itdb_parse, [:string, :pointer], :pointer
   attach_function :itdb_tracks_number, [:pointer], :uint32
 end
-db = GPod.itdb_parse("ipod/", nil)
 
-itdb = GPod::Itdb_iTunesDB.new(db)
-tracks = GPod::GList.new(itdb[:tracks])
-track = GPod::Itdb_Track.new(tracks[:data])
-puts "title: #{track[:title]}"
-puts "ipod path: #{track[:ipod_path]}"
-puts "album: #{track[:album]}"
+itdb = GPod::Itdb_iTunesDB.new( GPod.itdb_parse("ipod/", nil) )
+tracks_root = GPod::GList.new(itdb[:tracks])
+t = tracks_root
+i = 0
 
-#puts strptr.read_string(12)
+while t.to_ptr.null? != true do
+  i += 1
+  track = GPod::Itdb_Track.new(t[:data])
+  puts "title: #{track[:title]}"
+  puts "ipod path: #{track[:ipod_path]}"
+  puts "album: #{track[:album]}"
+  puts
 
-#tracks = db[:tracks]
-#ptr = GPod::Itdb_Track.new(tracks[:data])
-#str = ptr[:title].read_pointer
-#put str.read_string
+  t = GPod::GList.new(t[:next])
+end
 
-#puts t1[:artist]
-#puts GPod.itdb_tracks_number(db)
+puts "iterated over #{i} elements"
+puts "itdb_tracks_number says there are #{GPod::itdb_tracks_number(itdb)} elements"
