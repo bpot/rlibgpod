@@ -17,8 +17,8 @@ module GPod
            :playlists, :pointer,
            :filename, :string,
            :device, :pointer,
-           :version, :int32,
-           :id, :int64,
+           :version, :uint32,
+           :id, :uint64,
            :reserved_int1, :int32,
            :reserved_int2, :int32,
            :reserved1, :pointer,
@@ -34,6 +34,7 @@ end
 module GPod
   class Itdb_Track < ::FFI::Struct
     layout(
+           :itdb, :pointer,
            :title, :string,
            :ipod_path, :string,
            :album, :string,
@@ -171,8 +172,9 @@ db = GPod.itdb_parse("ipod/", nil)
 itdb = GPod::Itdb_iTunesDB.new(db)
 tracks = GPod::GList.new(itdb[:tracks])
 track = GPod::Itdb_Track.new(tracks[:data])
-puts track[:ipod_path]
-puts track[:album]
+puts "title: #{track[:title]}"
+puts "ipod path: #{track[:ipod_path]}"
+puts "album: #{track[:album]}"
 
 #puts strptr.read_string(12)
 
