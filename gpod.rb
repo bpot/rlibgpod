@@ -1,5 +1,6 @@
+require 'rubygems'
 require 'ffi'
-require 'method_lister'
+#require 'method_lister'
 
 module GPod
   class GList < ::FFI::Struct
@@ -35,10 +36,10 @@ module GPod
   class Itdb_Track < ::FFI::Struct
     layout(
            :itdb, :pointer,
-           :title, :string,
+           :title, :pointer,
            :ipod_path, :string,
-           :album, :string,
-           :artist, :string,
+           :album, :pointer,
+           :artist, :pointer,
            :genre, :string,
            :filetype, :string,
            :comment, :string,
@@ -157,6 +158,46 @@ module GPod
            :userdata_duplicate, :pointer,
            :userdata_destroy, :pointer
            )
+
+    [:title, :album, :artist].each do |field|
+      eval "def #{field}=(s); self[:#{field}] = FFI::MemoryPointer.from_string(s); end"
+    end
+
+    def thumbnail=(path)
+      GPod.itdb_track_set_thumbnails(self, FFI::MemoryPointer.from_string(path)) 
+    end
+  end
+end
+
+module GPod
+  class Itdb_Playlist < ::FFI::Struct
+    layout(
+      :itdb, :pointer,
+      :name, :pointer,
+      :type, :uint8,
+      :flag1, :uint8,
+      :flag2, :uint8,
+      :flag3, :uint8,
+      :num, :int,
+      :members, :pointer,
+      :is_spl, :int,
+      :timestamp, :time_t,
+      :id, :uint64,
+      :sortorder, :uint32,
+      :podcastflag, :uint32,
+      :splpref, :pointer,
+      :splrules, :pointer,
+      :reserved100, :pointer,
+      :reserved101, :pointer,
+      :reserved_int1, :int32,
+      :reserved_int2, :int32,
+      :reserved1, :pointer,
+      :reserved2, :pointer,
+      :usertype, :uint64,
+      :userdata, :pointer,
+      :userdata_duplicate, :pointer,
+      :userdata_destroy, :pointer
+    )
   end
 end
 
@@ -166,9 +207,17 @@ module GPod
 
   attach_function :itdb_parse, [:string, :pointer], :pointer
   attach_function :itdb_tracks_number, [:pointer], :uint32
+  attach_function :itdb_cp_track_to_ipod, [:pointer, :pointer, :pointer], :int
+  attach_function :itdb_write, [:pointer, :pointer], :int
+  attach_function :itdb_playlist_mpl, [:pointer], :pointer
+  attach_function :itdb_playlist_add_track, [:pointer, :pointer, :int], :void
+  attach_function :itdb_track_add, [:pointer, :pointer, :int], :void
+  attach_function :itdb_track_new, [], :pointer
+  attach_function :itdb_track_set_thumbnails, [:pointer, :pointer], :int
 end
 
-itdb = GPod::Itdb_iTunesDB.new( GPod.itdb_parse("ipod/", nil) )
+=begin
+itdb = GPod::Itdb_iTunesDB.new( GPod.itdb_parse("/mnt", nil) )
 tracks_root = GPod::GList.new(itdb[:tracks])
 t = tracks_root
 i = 0
@@ -186,3 +235,4 @@ end
 
 puts "iterated over #{i} elements"
 puts "itdb_tracks_number says there are #{GPod::itdb_tracks_number(itdb)} elements"
+=end
